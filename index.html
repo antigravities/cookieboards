@@ -19,11 +19,29 @@
     <script>
         let cookie;
 
+        // https://stackoverflow.com/a/10601315
+        function abbreviateNumber(value) {
+            var newValue = value;
+            if (value >= 1000) {
+                var suffixes = [ "", "thousand", "million", "billion", "trillion", "quadrillion", "quintillion", "sextillion", "septillion" ];
+                var suffixNum = Math.floor( (""+value).length/3 );
+                var shortValue = '';
+                for (var precision = 2; precision >= 1; precision--) {
+                    shortValue = parseFloat( (suffixNum != 0 ? (value / Math.pow(1000,suffixNum) ) : value).toPrecision(precision));
+                    var dotLessShortValue = (shortValue + '').replace(/[^a-zA-Z 0-9]+/g,'');
+                    if (dotLessShortValue.length <= 2) { break; }
+                }
+                if (shortValue % 1 != 0)  shortValue = shortValue.toFixed(1);
+                newValue = shortValue+ " " + suffixes[suffixNum];
+            }
+            return newValue;
+        }
+
         function generateCookieTable(cookie){
             document.querySelector("#scores").innerHTML = "";
 
             document.querySelector("#scores").innerHTML = "<tbody><thead><th>Bakery Name</th><th>Cookies</th><th>CPS</th><th>Cookies Per Click</th></thead>" +
-                cookie.filter(i => i.bakery.endsWith("'s bakery")).map(i => `<tr><td>${i.bakery}</td><td>${Math.round(i.cookies)}</td><td>${Math.round(i.cps*10)/10}</td><td>${Math.round(i.cpc*10)/10}</td></tr>`).join("") +
+                cookie.filter(i => i.bakery.endsWith("'s bakery")).map(i => `<tr><td>${i.bakery}</td><td>${abbreviateNumber(Math.round(i.cookies))}</td><td>${abbreviateNumber(Math.round(i.cps))}</td><td>${abbreviateNumber(Math.round(i.cpc))}</td></tr>`).join("") +
                 "</tbody>";
         }
 
@@ -50,7 +68,7 @@
                 }
             }
         }
-        
+
         window.addEventListener("load", async () => {
             cookie = (await (await fetch("/cookie")).json()).map(i => {
                 i.bakery = DOMPurify.sanitize(i.bakery);
@@ -63,7 +81,7 @@
 
     <body>
         <h1>CookieBoards</h1>
-        <b>Report your score to the leaderboard by using our mod: <a href="javascript:Game.LoadMod('{{HOST}}/mod');" onClick="alert('Drag this to your Bookmarks bar');">CookieBoards</a> &#8592; drag to bookmarks &middot; <a href="/download">Download Steam version</a> &middot; <code>Game.LoadMod("{{HOST}}/mod");</code></b>
+        <b>Report your score to the leaderboard by using our mod: <a href="javascript:Game.LoadMod('{{HOST}}/mod');" onClick="alert('Drag this to your Bookmarks bar and click it when the game is open'); return;">CookieBoards</a> &#8592; drag to bookmarks &middot; <a href="/download">Download Steam version</a> &middot; <code>Game.LoadMod("{{HOST}}/mod");</code></b>
 
         <hr>
 
