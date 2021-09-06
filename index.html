@@ -1,0 +1,74 @@
+<html>
+    <head>
+        <title>
+            CookieBoards - Cookie Clicker Leaderboards
+        </title>
+    </head>
+    <style type="text/css">
+        body {
+            font-family: 'Merriweather', Georgia, serif;
+        }
+
+        table {
+            width: 100%;
+        }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.1/purify.min.js" integrity="sha512-S/PLyajatVDMRoX6YRLkZ83bPizWLo1MspY/ZgBNEujw39occlW8RxuBKn/NBDgrMXDsz0r3z4vj24reW4PvmQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script>
+        let cookie;
+
+        function generateCookieTable(cookie){
+            document.querySelector("#scores").innerHTML = "";
+
+            document.querySelector("#scores").innerHTML = "<tbody><thead><th>Bakery Name</th><th>Cookies</th><th>CPS</th><th>Cookies Per Click</th></thead>" +
+                cookie.filter(i => i.bakery.endsWith("'s bakery")).map(i => `<tr><td>${i.bakery}</td><td>${Math.round(i.cookies)}</td><td>${Math.round(i.cps*10)/10}</td><td>${Math.round(i.cpc*10)/10}</td></tr>`).join("") +
+                "</tbody>";
+        }
+
+        function sortByCPS(a, b){
+            if( a < b ) return 1;
+            else if( a > b ) return -1;
+            else return 0;
+        }
+
+        function defaultSort(a, b){
+            if( a.prestige < b.prestige ) return 1;
+            else if( a.prestige > b.prestige ) return -1;
+            else {
+                if( a.cps < b.cps ) return 1;
+                else if( b.cps > a.cps ) return -1;
+                else {
+                    if( a.cpc < b.cpc ) return 1;
+                    else if( a.cpc > b.cpc ) return -1;
+                    else {
+                        if( a.cookies < b.cookies ) return 1;
+                        else if( a.cookies > b.cookies ) return -1;
+                        else return 0;
+                    }
+                }
+            }
+        }
+        
+        window.addEventListener("load", async () => {
+            cookie = (await (await fetch("/cookie")).json()).map(i => {
+                i.bakery = DOMPurify.sanitize(i.bakery);
+                return i;
+            }).sort(defaultSort);
+
+            generateCookieTable(cookie);
+        });
+    </script>
+
+    <body>
+        <h1>CookieBoards</h1>
+        <b>Report your score to the leaderboard by using our mod: <a href="javascript:Game.LoadMod('{{HOST}}/mod');" onClick="alert('Drag this to your Bookmarks bar');">CookieBoards</a> &#8592; drag to bookmarks &middot; <a href="/download">Download Steam version</a> &middot; <code>Game.LoadMod("{{HOST}}/mod");</code></b>
+
+        <hr>
+
+        <table id="scores" border=1>
+
+        </table>
+    </body>
+</html>
