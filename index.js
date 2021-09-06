@@ -91,8 +91,11 @@ app.get("/cookie", async (req, res) => {
 app.get("/download", async (req, res) => {
     res.writeHead(200, { "Content-Type": "application/zip" });
     var zip = new JSZip();
-    zip.file("main.js", `Game.LoadMod("${getHost()}/mod");`);
-    zip.file("info.txt", JSON.stringify({ "Name": `Cookie Clicker Leaderboards - ${getHost()}`, "ID": "cookies__" + getHost(), "Author": "Alexandra", "Description": `Report scores to ${getHost()}`, "GameVersion": "2.031", "Date": "06/09/2021", "Dependencies": [], "Disabled": 0, "AllowSteamAchievs": 1 }));
+    
+    let fol = zip.folder("cookieboards");
+    fol.file("main.js", `Game.LoadMod("${getHost()}/mod");`);
+    fol.file("info.txt", JSON.stringify({ "Name": `Cookie Clicker Leaderboards - ${getHost()}`, "ID": "cookies__" + getHost(), "Author": "Alexandra", "Description": `Report scores to ${getHost()}`, "GameVersion": "2.031", "Date": "06/09/2021", "Dependencies": [], "Disabled": 0, "AllowSteamAchievs": 1 }));
+    
     (await zip.generateNodeStream()).pipe(res);
     return;
 });
