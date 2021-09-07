@@ -8,16 +8,40 @@
 <style type="text/css">
     body {
         font-family: 'Merriweather', Georgia, serif;
+        padding: 1%;
+        text-align: center;
     }
 
     table {
+        border-collapse: collapse;
         width: 100%;
+        text-align: center;
+    }
+
+    thead {
+        background-color: #dfdfdf;
+    }
+
+    tbody {
+        overflow-y: auto;
+        max-height: 70vh;
+    }
+
+    td,
+    th {
+        width: 25%;
+        height: 25px;
+        border: dashed 1px lightblue;
+    }
+
+    #tcontain {
+        background-color: whitesmoke;
+        padding: 10px;
+        border-radius: 5px;
     }
 </style>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.1/purify.min.js"
-    integrity="sha512-S/PLyajatVDMRoX6YRLkZ83bPizWLo1MspY/ZgBNEujw39occlW8RxuBKn/NBDgrMXDsz0r3z4vj24reW4PvmQ=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.1/purify.min.js" integrity="sha512-S/PLyajatVDMRoX6YRLkZ83bPizWLo1MspY/ZgBNEujw39occlW8RxuBKn/NBDgrMXDsz0r3z4vj24reW4PvmQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <script>
     let cookie;
@@ -25,7 +49,7 @@
     // https://gist.githubusercontent.com/tobyjsullivan/96d37ca0216adee20fa95fe1c3eb56ac/raw/48cac15a217507eeb66e3790f5d1d94c894ca782/abbreviateNum.js
     function abbreviateNumber(value) {
         let newValue = value;
-        const suffixes = ["", "thousand", "million", "billion", "trillion", "quadrillion", "quintillion", "sextillion", "septillion", "octillion", "nonillion", "decillion", "undecillion", "duodecillion", "tredecillion", "quattuordecillion", "quindecillion", "sexdecillion" ];
+        const suffixes = ["", "thousand", "million", "billion", "trillion", "quadrillion", "quintillion", "sextillion", "septillion", "octillion", "nonillion", "decillion", "undecillion", "duodecillion", "tredecillion", "quattuordecillion", "quindecillion", "sexdecillion"];
         let suffixNum = 0;
         while (newValue >= 1000) {
             newValue /= 1000;
@@ -41,7 +65,7 @@
     function generateCookieTable(cookie) {
         document.querySelector("#scores").innerHTML = "";
 
-        document.querySelector("#scores").innerHTML = "<tbody><thead><th>Bakery Name</th><th>Cookies</th><th>CPS</th><th>Cookies Per Click</th></thead>" +
+        document.querySelector("#scores").innerHTML = "<thead><th>Bakery Name</th><th>Cookies</th><th>CPS</th><th>Cookies Per Click</th></thead>" +
             cookie.filter(i => i.bakery.endsWith("bakery")).map(i => `<tr><td>${i.bakery} (<b>${i.prestige || 0}</b>)</td><td>${abbreviateNumber(Math.round(parseFloat(i.cookies)))}</td><td>${abbreviateNumber(Math.round(parseFloat(i.cps)))}</td><td>${abbreviateNumber(parseFloat(Math.round(i.cpc)))}</td></tr>`).join("") +
             "</tbody>";
     }
@@ -70,28 +94,32 @@
         }
     }
 
-    window.addEventListener("load", async () => {
+    async function load() {
         cookie = (await (await fetch("/cookie")).json()).map(i => {
             i.bakery = DOMPurify.sanitize(i.bakery);
             return i;
         }).sort(defaultSort);
 
         generateCookieTable(cookie);
-    });
+    }
+
+    window.addEventListener("load", load);
+
+    // Eventually index.js will emit "pulses" of new data to reduce network traffic 
+    window.setInterval(load, 5000)
 </script>
 
 <body>
     <h1>CookieBoards</h1>
-    <b>Report your score to the leaderboard by using our mod: <a href="javascript:Game.LoadMod('{{HOST}}/mod');"
-            onClick="alert('Drag this to your Bookmarks bar and click it when the game is open'); return;">CookieBoards</a>
+    <b>Report your score to this leaderboard by using our mod!</br><a href="javascript:Game.LoadMod('{{HOST}}/mod');" onClick="alert('Drag this to your Bookmarks bar and click it when the game is open'); return;">CookieBoards</a>
         &#8592; drag to bookmarks &middot; <a href="/download">Download Steam version</a> &middot;
         <code>Game.LoadMod("{{HOST}}/mod");</code></b>
 
     <hr>
-
-    <table id="scores" border=1>
-
-    </table>
+    <div id="tcontain">
+        <table id="scores">
+        </table>
+    </div>
 </body>
 
 </html>

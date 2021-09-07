@@ -5,9 +5,15 @@ const JSZip = require("jszip");
 
 let users = {};
 
-function getHost(){
+function getHost() {
     return process.env.HOST || ("http://localhost:" + (process.env.PORT || "5000"));
 }
+
+function getPassword() {
+    console.warn("You did not supply a password. It has been set to \"dev\"")
+    return process.env.PASSWORD || "dev";
+}
+const password = getPassword();
 
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "https://orteil.dashnet.org");
@@ -15,13 +21,13 @@ app.use((req, res, next) => {
 });
 
 app.get("/new", (req, res) => {
-    if( ! req.query.hasOwnProperty("password") ) {
+    if (!req.query.hasOwnProperty("password")) {
         res.writeHead(400);
         res.end(JSON.stringify({ "error": "missing parameters" }));
         return;
     }
 
-    if( req.query.password != process.env.PASSWORD ){
+    if (req.query.password != password) {
         res.writeHead(401);
         res.end(JSON.stringify({ "error": "invalid password" }));
         return;
@@ -35,13 +41,13 @@ app.get("/new", (req, res) => {
 });
 
 app.get("/cps", (req, res) => {
-    if( ! req.query.hasOwnProperty("user") || ! req.query.hasOwnProperty("cps") || ! req.query.hasOwnProperty("bakery") || ! req.query.hasOwnProperty("cookies") || ! req.query.hasOwnProperty("prestige") ){
+    if (!req.query.hasOwnProperty("user") || !req.query.hasOwnProperty("cps") || !req.query.hasOwnProperty("bakery") || !req.query.hasOwnProperty("cookies") || !req.query.hasOwnProperty("prestige")) {
         res.writeHead(400);
         res.end(JSON.stringify({ "error": "missing parameters" }));
         return;
     }
 
-    if( ! users.hasOwnProperty(req.query.user) ){
+    if (!users.hasOwnProperty(req.query.user)) {
         res.writeHead(401);
         res.end(JSON.stringify({ "error": "user not found" }));
         return;
@@ -60,13 +66,13 @@ app.get("/cps", (req, res) => {
 });
 
 app.get("/cpc", (req, res) => {
-    if( ! req.query.hasOwnProperty("user") || ! req.query.hasOwnProperty("cpc") || ! req.query.hasOwnProperty("bakery") || ! req.query.hasOwnProperty("cookies") || ! req.query.hasOwnProperty("prestige") ){
+    if (!req.query.hasOwnProperty("user") || !req.query.hasOwnProperty("cpc") || !req.query.hasOwnProperty("bakery") || !req.query.hasOwnProperty("cookies") || !req.query.hasOwnProperty("prestige")) {
         res.writeHead(400);
         res.end(JSON.stringify({ "error": "missing parameters" }));
         return;
     }
 
-    if( ! users.hasOwnProperty(req.query.user) ){
+    if (!users.hasOwnProperty(req.query.user)) {
         res.writeHead(401);
         res.end(JSON.stringify({ "error": "user not found" }));
         return;
@@ -97,7 +103,7 @@ app.get("/cookie", async (req, res) => {
 app.get("/download", async (req, res) => {
     res.writeHead(200, { "Content-Type": "application/zip" });
     var zip = new JSZip();
-    
+
     let fol = zip.folder("cookieboards");
     fol.file("main.js", `Game.LoadMod("${getHost()}/mod");`);
     fol.file("info.txt", JSON.stringify({ "Name": `Cookie Clicker Leaderboards - ${getHost()}`, "ID": "cookies__" + getHost(), "Author": "Alexandra", "Description": `Report scores to ${getHost()}`, "GameVersion": "2.031", "Date": "06/09/2021", "Dependencies": [], "Disabled": 0, "AllowSteamAchievs": 1 }));
@@ -120,7 +126,7 @@ setInterval(async () => {
 (async () => {
     try {
         users = JSON.parse(await fs.readFile("cookie.json"));
-    } catch(e) {
+    } catch (e) {
         console.log(e);
         users = {};
     }
