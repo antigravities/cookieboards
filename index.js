@@ -123,7 +123,7 @@ app.get("/", async (req, res) => {
 });
 
 // allow admins and the user themself to give a user an alias, for if the user has a confusing bakery name and viewers may be unsure of who runs it
-// this is not privileged because only admins and the user would know the user id... right???.... right??? ugh, TODO
+// this is not privileged because only admins and the user would know the user id
 // this is not a method of handling abuse
 // TODO: IP bans, ID bans, and forced bakery names as actual ways to handle abuse (can't have epic haxxors on our leaderboard, can we?)
 app.get("/alias", async (req, res) => {
