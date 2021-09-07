@@ -69,8 +69,6 @@ CookieBoards.getBakeryName = () => {
     return document.querySelector("#bakeryName").innerText;
 }
 
-// TODO: Why are there two endpoints for CPS and CPC? Could it be one?
-// CPS sometimes effects CPC, but not always. Is it more or less intensive to have them combined? Adding another param only costs a few bytes.
 CookieBoards.reportCPS = async cps => {
     cps = Game.cookiesPs;
 

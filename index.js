@@ -19,9 +19,44 @@ function adminPassword() {
     return process.env.ADMIN || false;
 }
 
+function getClientIp(req) {
+    var ipAddr = req.connection.remoteAddress;
+
+    if (!ipAddr) return '';
+
+    // make it actually a IP (what the #$%@ was it before??!)
+    if (ipAddr.substr(0, 7) == "::ffff:") {
+        ipAddr = ipAddr.substr(7)
+    }
+
+    // and give back an actually sane IP, what
+    return ipAddr;
+}
+
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "https://orteil.dashnet.org");
     next();
+});
+
+function getIpBlacklist() {
+    (async () => {
+        try {
+            let ipBlacklist = JSON.parse(await fs.readFile("ipBlacklist.json"));
+        } catch (e) {
+            console.log(e);
+            let ipBlacklist = [];
+        }
+    })();
+    return ipBlacklist.list; // list should be an array of strings
+}
+
+app.use((req, res, next) => {
+    var ipAddr = getClientIp(req);
+
+    if (getIpBlacklist().indexOf(ipAddr) !== -1) console.log(`everyone! look at the fool with the ip ${ipAddr}`);
+    else if (!req.query.hasOwnProperty("user")) return;
+    else if (users[req.query.user].blocked == true) console.log(`we blocked a connection attempt from ${req.query.user}`);
+    else next();
 });
 
 app.get("/new", (req, res) => {
@@ -44,6 +79,9 @@ app.get("/new", (req, res) => {
     res.end(JSON.stringify({ "id": user }));
 });
 
+// TODO: Why are there two endpoints for CPS and CPC? Could it be one?
+// CPS sometimes effects CPC, but not always. Is it more or less intensive to have them combined? Adding another param only costs a few bytes.
+// plus, its not like the bakery name updates each time, and yet here we are.
 app.get("/cps", (req, res) => {
     if (!req.query.hasOwnProperty("user") || !req.query.hasOwnProperty("cps") || !req.query.hasOwnProperty("bakery") || !req.query.hasOwnProperty("cookies") || !req.query.hasOwnProperty("prestige")) {
         res.writeHead(400);
