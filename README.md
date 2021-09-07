@@ -7,8 +7,9 @@ Why take screenshots of your worthless stats when you can show them off on a sil
 
 ```sh
 git clone git@github.com:antigravities/cookieboards.git
-touch cookie.json
 cd cookieboards
+touch cookie.json
+touch ipBlacklist.json
 npm i
 HOST=cookie.your.domain PORT=5000 PASSWORD=yourpassword npm start
 ```
@@ -21,6 +22,7 @@ We will infer you wanted to start your development server on `https://localhost:
 git clone git@github.com:antigravities/cookieboards.git
 cd cookieboards
 touch cookie.json
+touch ipBlacklist.json
 npm i
 PASSWORD=yourpassword npm start
 ```

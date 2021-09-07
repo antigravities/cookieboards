@@ -47,13 +47,13 @@ function getIpBlacklist() {
             let ipBlacklist = [];
         }
     })();
-    return ipBlacklist.list; // list should be an array of strings
+    return ipBlacklist; // list should be an array of strings
 }
 
 app.use((req, res, next) => {
     var ipAddr = getClientIp(req);
 
-    if (getIpBlacklist().indexOf(ipAddr) !== -1) console.log(`everyone! look at the fool with the ip ${ipAddr}`);
+    if (getIpBlacklist().list.indexOf(ipAddr) !== -1) console.log(`everyone! look at the fool with the ip ${ipAddr}`);
     else if (!req.query.hasOwnProperty("user")) return;
     else if (users[req.query.user].blocked == true) console.log(`we blocked a connection attempt from ${req.query.user}`);
     else next();
@@ -163,7 +163,7 @@ app.get("/", async (req, res) => {
 // allow admins and the user themself to give a user an alias, for if the user has a confusing bakery name and viewers may be unsure of who runs it
 // this is not privileged because only admins and the user would know the user id
 // this is not a method of handling abuse
-// TODO: IP bans, ID bans, and forced bakery names as actual ways to handle abuse (can't have epic haxxors on our leaderboard, can we?)
+// TODO: forced bakery names as actual ways to handle abuse (can't have oopsie names)
 app.get("/alias", async (req, res) => {
     if (!req.query.hasOwnProperty("user") || !req.query.hasOwnProperty("alias")) {
         res.writeHead(400);
@@ -179,6 +179,26 @@ app.get("/alias", async (req, res) => {
 
     users[req.query.user].alias = req.query.alias;
 });
+
+// add a way to block users from an api
+
+app.get("/block", async (req, res) => {
+    if (!req.query.hasOwnProperty("type") || !req.query.hasOwnProperty("auth") || !req.query.hasOwnProperty("user")) {
+        res.writeHead(400);
+        res.end(JSON.stringify({ "error": "missing parameters" }));
+        return;
+    }
+    
+    if (req.query.type == "ip" || req.query.type == "both") {
+        let list = getIpBlacklist();
+        list.list.push(req.query.ip);
+        await fs.writeFile("ipBlacklist.json", JSON.stringify(list));
+    }
+
+    if (req.query.type == "user" || req.query.type == "both") {
+        users[req.query.user].blocked = true;
+    }
+})
 
 app.listen(process.env.PORT || 5000);
 
