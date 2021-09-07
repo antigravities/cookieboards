@@ -47,9 +47,12 @@ app.get("/cps", (req, res) => {
         return;
     }
 
+    req.query.cps = req.query.cps.replace(/ /g, "+");
+    req.query.cookies = req.query.cookies.replace(/ /g, "+");
+
     users[req.query.user].bakery = req.query.bakery;
-    users[req.query.user].cps = (isNaN(parseFloat(req.query.cps)) ? 0 : parseFloat(req.query.cps));
-    users[req.query.user].cookies = (isNaN(parseFloat(req.query.cookies)) ? 0 : parseFloat(req.query.cookies));
+    users[req.query.user].cps = (isNaN(parseFloat(req.query.cps)) ? 0 : parseFloat(req.query.cps)).toExponential().toString();
+    users[req.query.user].cookies = (isNaN(parseFloat(req.query.cookies)) ? 0 : parseFloat(req.query.cookies)).toExponential().toString();
     users[req.query.user].prestige = (isNaN(parseFloat(req.query.cookies)) ? 0 : parseFloat(req.query.prestige));
 
     res.writeHead(200);
@@ -69,9 +72,12 @@ app.get("/cpc", (req, res) => {
         return;
     }
 
+    req.query.cpc = req.query.cpc.replace(/ /g, "+");
+    req.query.cookies = req.query.cookies.replace(/ /g, "+");
+
     users[req.query.user].bakery = req.query.bakery;
-    users[req.query.user].cpc = (isNaN(parseFloat(req.query.cpc)) ? 0 : parseFloat(req.query.cpc));
-    users[req.query.user].cookies = (isNaN(parseFloat(req.query.cookies)) ? 0 : parseFloat(req.query.cookies));
+    users[req.query.user].cpc = (isNaN(parseFloat(req.query.cpc)) ? 0 : parseFloat(req.query.cpc)).toString();
+    users[req.query.user].cookies = (isNaN(parseFloat(req.query.cookies)) ? 0 : parseFloat(req.query.cookies)).toString();
     users[req.query.user].prestige = (isNaN(parseFloat(req.query.cookies)) ? 0 : parseFloat(req.query.prestige));
 
     res.writeHead(200);
@@ -95,7 +101,7 @@ app.get("/download", async (req, res) => {
     let fol = zip.folder("cookieboards");
     fol.file("main.js", `Game.LoadMod("${getHost()}/mod");`);
     fol.file("info.txt", JSON.stringify({ "Name": `Cookie Clicker Leaderboards - ${getHost()}`, "ID": "cookies__" + getHost(), "Author": "Alexandra", "Description": `Report scores to ${getHost()}`, "GameVersion": "2.031", "Date": "06/09/2021", "Dependencies": [], "Disabled": 0, "AllowSteamAchievs": 1 }));
-    
+
     (await zip.generateNodeStream()).pipe(res);
     return;
 });

@@ -86,8 +86,6 @@ CookieBoards.reportCPC = async cpc => {
     let userID = await CookieBoards.getUserID();
     if( userID === false ) return;
 
-    console.log("cpc");
-
     try {
         let report = await (await fetch("{{HOST}}/cpc?user=" + encodeURIComponent(userID) + "&cpc=" + encodeURIComponent(cpc) + "&bakery=" + encodeURIComponent(CookieBoards.getBakeryName()) + "&cookies=" + Game.cookies + "&prestige=" + Game.prestige)).json();
         

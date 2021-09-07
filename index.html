@@ -1,92 +1,97 @@
 <html>
-    <head>
-        <title>
-            CookieBoards - Cookie Clicker Leaderboards
-        </title>
-    </head>
-    <style type="text/css">
-        body {
-            font-family: 'Merriweather', Georgia, serif;
+
+<head>
+    <title>
+        CookieBoards - Cookie Clicker Leaderboards
+    </title>
+</head>
+<style type="text/css">
+    body {
+        font-family: 'Merriweather', Georgia, serif;
+    }
+
+    table {
+        width: 100%;
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.1/purify.min.js"
+    integrity="sha512-S/PLyajatVDMRoX6YRLkZ83bPizWLo1MspY/ZgBNEujw39occlW8RxuBKn/NBDgrMXDsz0r3z4vj24reW4PvmQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+    let cookie;
+
+    // https://gist.githubusercontent.com/tobyjsullivan/96d37ca0216adee20fa95fe1c3eb56ac/raw/48cac15a217507eeb66e3790f5d1d94c894ca782/abbreviateNum.js
+    function abbreviateNumber(value) {
+        let newValue = value;
+        const suffixes = ["", "thousand", "million", "billion", "trillion", "quadrillion", "quintillion", "sextillion", "septillion", "octillion", "nonillion", "decillion" ];
+        let suffixNum = 0;
+        while (newValue >= 1000) {
+            newValue /= 1000;
+            suffixNum++;
         }
 
-        table {
-            width: 100%;
-        }
-    </style>
+        newValue = newValue.toPrecision(5);
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.1/purify.min.js" integrity="sha512-S/PLyajatVDMRoX6YRLkZ83bPizWLo1MspY/ZgBNEujw39occlW8RxuBKn/NBDgrMXDsz0r3z4vj24reW4PvmQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        newValue += " " + suffixes[suffixNum];
+        return newValue;
+    }
 
-    <script>
-        let cookie;
+    function generateCookieTable(cookie) {
+        document.querySelector("#scores").innerHTML = "";
 
-        // https://stackoverflow.com/a/10601315
-        function abbreviateNumber(value) {
-            var newValue = value;
-            if (value >= 1000) {
-                var suffixes = [ "", "thousand", "million", "billion", "trillion", "quadrillion", "quintillion", "sextillion", "septillion" ];
-                var suffixNum = Math.floor( (""+value).length/3 );
-                var shortValue = '';
-                for (var precision = 2; precision >= 1; precision--) {
-                    shortValue = parseFloat( (suffixNum != 0 ? (value / Math.pow(1000,suffixNum) ) : value).toPrecision(precision));
-                    var dotLessShortValue = (shortValue + '').replace(/[^a-zA-Z 0-9]+/g,'');
-                    if (dotLessShortValue.length <= 2) { break; }
-                }
-                if (shortValue % 1 != 0)  shortValue = shortValue.toFixed(1);
-                newValue = shortValue+ " " + suffixes[suffixNum];
-            }
-            return newValue;
-        }
+        document.querySelector("#scores").innerHTML = "<tbody><thead><th>Bakery Name</th><th>Cookies</th><th>CPS</th><th>Cookies Per Click</th></thead>" +
+            cookie.filter(i => i.bakery.endsWith("'s bakery")).map(i => `<tr><td>${i.bakery} (<b>${i.prestige || 0}</b>)</td><td>${abbreviateNumber(Math.round(parseFloat(i.cookies)))}</td><td>${abbreviateNumber(Math.round(parseFloat(i.cps)))}</td><td>${abbreviateNumber(parseFloat(Math.round(i.cpc)))}</td></tr>`).join("") +
+            "</tbody>";
+    }
 
-        function generateCookieTable(cookie){
-            document.querySelector("#scores").innerHTML = "";
+    function sortByCPS(a, b) {
+        if (a < b) return 1;
+        else if (a > b) return -1;
+        else return 0;
+    }
 
-            document.querySelector("#scores").innerHTML = "<tbody><thead><th>Bakery Name</th><th>Cookies</th><th>CPS</th><th>Cookies Per Click</th></thead>" +
-                cookie.filter(i => i.bakery.endsWith("'s bakery")).map(i => `<tr><td>${i.bakery}</td><td>${abbreviateNumber(Math.round(i.cookies))}</td><td>${abbreviateNumber(Math.round(i.cps))}</td><td>${abbreviateNumber(Math.round(i.cpc))}</td></tr>`).join("") +
-                "</tbody>";
-        }
-
-        function sortByCPS(a, b){
-            if( a < b ) return 1;
-            else if( a > b ) return -1;
-            else return 0;
-        }
-
-        function defaultSort(a, b){
-            if( a.prestige < b.prestige ) return 1;
-            else if( a.prestige > b.prestige ) return -1;
+    function defaultSort(a, b) {
+        if (a.prestige < b.prestige) return 1;
+        else if (a.prestige > b.prestige) return -1;
+        else {
+            if (a.cps < b.cps) return 1;
+            else if (b.cps > a.cps) return -1;
             else {
-                if( a.cps < b.cps ) return 1;
-                else if( b.cps > a.cps ) return -1;
+                if (a.cpc < b.cpc) return 1;
+                else if (a.cpc > b.cpc) return -1;
                 else {
-                    if( a.cpc < b.cpc ) return 1;
-                    else if( a.cpc > b.cpc ) return -1;
-                    else {
-                        if( a.cookies < b.cookies ) return 1;
-                        else if( a.cookies > b.cookies ) return -1;
-                        else return 0;
-                    }
+                    if (a.cookies < b.cookies) return 1;
+                    else if (a.cookies > b.cookies) return -1;
+                    else return 0;
                 }
             }
         }
+    }
 
-        window.addEventListener("load", async () => {
-            cookie = (await (await fetch("/cookie")).json()).map(i => {
-                i.bakery = DOMPurify.sanitize(i.bakery);
-                return i;
-            }).sort(defaultSort);
+    window.addEventListener("load", async () => {
+        cookie = (await (await fetch("/cookie")).json()).map(i => {
+            i.bakery = DOMPurify.sanitize(i.bakery);
+            return i;
+        }).sort(defaultSort);
 
-            generateCookieTable(cookie);
-        });
-    </script>
+        generateCookieTable(cookie);
+    });
+</script>
 
-    <body>
-        <h1>CookieBoards</h1>
-        <b>Report your score to the leaderboard by using our mod: <a href="javascript:Game.LoadMod('{{HOST}}/mod');" onClick="alert('Drag this to your Bookmarks bar and click it when the game is open'); return;">CookieBoards</a> &#8592; drag to bookmarks &middot; <a href="/download">Download Steam version</a> &middot; <code>Game.LoadMod("{{HOST}}/mod");</code></b>
+<body>
+    <h1>CookieBoards</h1>
+    <b>Report your score to the leaderboard by using our mod: <a href="javascript:Game.LoadMod('{{HOST}}/mod');"
+            onClick="alert('Drag this to your Bookmarks bar and click it when the game is open'); return;">CookieBoards</a>
+        &#8592; drag to bookmarks &middot; <a href="/download">Download Steam version</a> &middot;
+        <code>Game.LoadMod("{{HOST}}/mod");</code></b>
 
-        <hr>
+    <hr>
 
-        <table id="scores" border=1>
+    <table id="scores" border=1>
 
-        </table>
-    </body>
+    </table>
+</body>
+
 </html>
