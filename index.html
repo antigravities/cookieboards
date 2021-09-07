@@ -15,9 +15,7 @@
     }
 </style>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.1/purify.min.js"
-    integrity="sha512-S/PLyajatVDMRoX6YRLkZ83bPizWLo1MspY/ZgBNEujw39occlW8RxuBKn/NBDgrMXDsz0r3z4vj24reW4PvmQ=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.1/purify.min.js" integrity="sha512-S/PLyajatVDMRoX6YRLkZ83bPizWLo1MspY/ZgBNEujw39occlW8RxuBKn/NBDgrMXDsz0r3z4vj24reW4PvmQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <script>
     let cookie;
@@ -25,7 +23,7 @@
     // https://gist.githubusercontent.com/tobyjsullivan/96d37ca0216adee20fa95fe1c3eb56ac/raw/48cac15a217507eeb66e3790f5d1d94c894ca782/abbreviateNum.js
     function abbreviateNumber(value) {
         let newValue = value;
-        const suffixes = ["", "thousand", "million", "billion", "trillion", "quadrillion", "quintillion", "sextillion", "septillion", "octillion", "nonillion", "decillion", "undecillion", "duodecillion", "tredecillion", "quattuordecillion", "quindecillion", "sexdecillion" ];
+        const suffixes = ["", "thousand", "million", "billion", "trillion", "quadrillion", "quintillion", "sextillion", "septillion", "octillion", "nonillion", "decillion", "undecillion", "duodecillion", "tredecillion", "quattuordecillion", "quindecillion", "sexdecillion"];
         let suffixNum = 0;
         while (newValue >= 1000) {
             newValue /= 1000;
@@ -70,20 +68,24 @@
         }
     }
 
-    window.addEventListener("load", async () => {
+    async function load() {
         cookie = (await (await fetch("/cookie")).json()).map(i => {
             i.bakery = DOMPurify.sanitize(i.bakery);
             return i;
         }).sort(defaultSort);
 
         generateCookieTable(cookie);
-    });
+    }
+
+    window.addEventListener("load", load);
+
+    // Eventually index.js will emit "pulses" of new data to reduce network traffic 
+    window.setInterval(load, 3000)
 </script>
 
 <body>
     <h1>CookieBoards</h1>
-    <b>Report your score to the leaderboard by using our mod: <a href="javascript:Game.LoadMod('{{HOST}}/mod');"
-            onClick="alert('Drag this to your Bookmarks bar and click it when the game is open'); return;">CookieBoards</a>
+    <b>Report your score to the leaderboard by using our mod: <a href="javascript:Game.LoadMod('{{HOST}}/mod');" onClick="alert('Drag this to your Bookmarks bar and click it when the game is open'); return;">CookieBoards</a>
         &#8592; drag to bookmarks &middot; <a href="/download">Download Steam version</a> &middot;
         <code>Game.LoadMod("{{HOST}}/mod");</code></b>
 
