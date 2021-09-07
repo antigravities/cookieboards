@@ -15,6 +15,10 @@ function getPassword() {
 }
 const password = getPassword();
 
+function adminPassword() {
+    return process.env.ADMIN || false;
+}
+
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "https://orteil.dashnet.org");
     next();
@@ -102,6 +106,7 @@ app.get("/cookie", async (req, res) => {
 
 app.get("/download", async (req, res) => {
     res.writeHead(200, { "Content-Type": "application/zip" });
+    // TODO: Let's not regenerate the zip each call, a hash check should suffice
     var zip = new JSZip();
 
     let fol = zip.folder("cookieboards");
@@ -115,6 +120,26 @@ app.get("/download", async (req, res) => {
 app.get("/", async (req, res) => {
     res.writeHead(200, { "Content-Type": "text/html" });
     res.end((await fs.readFile("index.html")).toString().replace(/\{\{HOST\}\}/g, getHost()))
+});
+
+// allow admins and the user themself to give a user an alias, for if the user has a confusing bakery name and viewers may be unsure of who runs it
+// this is not privileged because only admins and the user would know the user id... right???.... right??? ugh, TODO
+// this is not a method of handling abuse
+// TODO: IP bans, ID bans, and forced bakery names as actual ways to handle abuse (can't have epic haxxors on our leaderboard, can we?)
+app.get("/alias", async (req, res) => {
+    if (!req.query.hasOwnProperty("user") || !req.query.hasOwnProperty("alias")) {
+        res.writeHead(400);
+        res.end(JSON.stringify({ "error": "missing parameters" }));
+        return;
+    }
+
+    if (!users.hasOwnProperty(req.query.user)) {
+        res.writeHead(401);
+        res.end(JSON.stringify({ "error": "user not found" }));
+        return;
+    }
+
+    users[req.query.user].alias = req.query.alias;
 });
 
 app.listen(process.env.PORT || 5000);
