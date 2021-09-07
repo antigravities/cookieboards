@@ -25,7 +25,7 @@
     // https://gist.githubusercontent.com/tobyjsullivan/96d37ca0216adee20fa95fe1c3eb56ac/raw/48cac15a217507eeb66e3790f5d1d94c894ca782/abbreviateNum.js
     function abbreviateNumber(value) {
         let newValue = value;
-        const suffixes = ["", "thousand", "million", "billion", "trillion", "quadrillion", "quintillion", "sextillion", "septillion", "octillion", "nonillion", "decillion" ];
+        const suffixes = ["", "thousand", "million", "billion", "trillion", "quadrillion", "quintillion", "sextillion", "septillion", "octillion", "nonillion", "decillion", "undecillion", "duodecillion", "tredecillion", "quattuordecillion", "quindecillion", "sexdecillion" ];
         let suffixNum = 0;
         while (newValue >= 1000) {
             newValue /= 1000;
