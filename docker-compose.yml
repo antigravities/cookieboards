@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  cookieboards:
+    image: antigravities/cookieboards:latest
+    restart: unless-stopped
+    environment:
+      HOST: https://cookie.your.domain
+      PORT: 5000
+      PASSWORD: yourpassword
+    ports:
+      - "127.0.0.1:5000:5000"
+    volumes:
+      - ./data/cookie.json:/app/cookie.json
