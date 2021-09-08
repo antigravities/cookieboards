@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   cookieboards:
-    image: antigravities/cookieboards:latest
+    image: ghcr.io/antigravities/cookieboards:latest
     restart: unless-stopped
     environment:
       HOST: https://cookie.your.domain
