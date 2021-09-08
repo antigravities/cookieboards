@@ -10,8 +10,11 @@ function getHost() {
 }
 
 function getPassword() {
-    console.warn("You did not supply a password. It has been set to \"dev\"")
-    return process.env.PASSWORD || "dev";
+    if( ! process.env.PASSWORD ){
+        console.warn(`You did not supply a password. It has been set to "dev". To supply a password, use the PASSWORD environment variable: PASSWORD="mypassword" ${process.argv.join(" ")}`);
+        return "dev";
+    }
+    return process.env.PASSWORD;
 }
 const password = getPassword();
 
