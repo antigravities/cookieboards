@@ -97,6 +97,11 @@
     async function load() {
         cookie = (await (await fetch("/cookie")).json()).map(i => {
             i.bakery = DOMPurify.sanitize(i.bakery);
+            
+            i.cookies = parseFloat(i.cookies);
+            i.cps = parseFloat(i.cps);
+            i.cpc = parseFloat(i.cpc);
+
             return i;
         }).sort(defaultSort);
 
