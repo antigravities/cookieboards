@@ -68,7 +68,7 @@ CookieBoards.getBakeryName = () => {
 }
 
 CookieBoards.reportCPS = async cps => {
-    cps = Game.cookiesPs*(1-Game.cpsSucked)
+    cps = Game.cookiesPs*(1-Game.cpsSucked);
 
     let userID = await CookieBoards.getUserID();
     if( userID === false ) return;
