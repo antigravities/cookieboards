@@ -1,3 +1,5 @@
+// TODO: Check for updates on load in a non destructive way
+
 const CookieBoards = {};
 
 CookieBoards.disabled = false;

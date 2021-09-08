@@ -15,8 +15,9 @@ or
 
 ```sh
 git clone git@github.com:antigravities/cookieboards.git
-touch cookie.json
 cd cookieboards
+touch cookie.json
+touch ipBlacklist.json
 npm i
 HOST=cookie.your.domain PORT=5000 PASSWORD=yourpassword npm start
 ```
@@ -29,6 +30,7 @@ Assuming that you wanted to start the server on `https://localhost:5000`:
 git clone git@github.com:antigravities/cookieboards.git
 cd cookieboards
 touch cookie.json
+touch ipBlacklist.json
 npm i
 PASSWORD=yourpassword npm start
 ```

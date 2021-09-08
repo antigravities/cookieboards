@@ -87,11 +87,17 @@
         return negative?'-'+output:output+decimal;
     }
 
+    function bakery(bakery) {
+        if (!bakery.alias) return bakery.bakery;
+        return `<abbr title="${bakery.alias}">${bakery.bakery}</abbr>`
+    }
+
+    // TODO: Is Online? cell
     function generateCookieTable(cookie) {
         document.querySelector("#scores").innerHTML = "";
 
         document.querySelector("#scores").innerHTML = "<thead><th>Bakery Name</th><th>Cookies</th><th>CPS</th><th>Cookies Per Click</th></thead>" +
-            cookie.filter(i => i.bakery.endsWith("bakery")).map(i => `<tr><td>${i.bakery} (<b>${i.prestige || 0}</b>)</td><td>${abbreviateNumber(Math.round(parseFloat(i.cookies)))}</td><td>${abbreviateNumber(Math.round(parseFloat(i.cps)))}</td><td>${abbreviateNumber(parseFloat(Math.round(i.cpc)))}</td></tr>`).join("") +
+            cookie.filter(i => i.bakery.endsWith("bakery")).map(i => `<tr><td>${bakery(i)} (<b>${i.prestige || 0}</b>)</td><td>${abbreviateNumber(Math.round(parseFloat(i.cookies)))}</td><td>${abbreviateNumber(Math.round(parseFloat(i.cps)))}</td><td>${abbreviateNumber(parseFloat(Math.round(i.cpc)))}</td></tr>`).join("") +
             "</tbody>";
     }
 
@@ -135,7 +141,7 @@
 
     window.addEventListener("load", load);
 
-    // Eventually index.js will emit "pulses" of new data to reduce network traffic 
+    // Eventually index.js will emit "pulses" of new data to reduce network traffic but for now we are all epic gamers with unlimited bandwidth
     window.setInterval(load, 5000)
 </script>
 
@@ -144,7 +150,6 @@
     <b>Report your score to this leaderboard by using our mod!</br><a href="javascript:Game.LoadMod('{{HOST}}/mod');" onClick="alert('Drag this to your Bookmarks bar and click it when the game is open'); return;">CookieBoards</a>
         &#8592; drag to bookmarks &middot; <a href="/download">Download Steam version</a> &middot;
         <code>Game.LoadMod("{{HOST}}/mod");</code></b>
-
     <hr>
     <div id="tcontain">
         <table id="scores">
