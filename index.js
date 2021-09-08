@@ -21,7 +21,6 @@ function adminPassword() {
 
 function getClientIp(req) {
     var ipAddr = req.connection.remoteAddress;
-
     if (!ipAddr) return '';
 
     // make it actually a IP (what the #$%@ was it before??!)
@@ -38,23 +37,21 @@ app.use((req, res, next) => {
     next();
 });
 
-function getIpBlacklist() {
-    (async () => {
-        try {
-            let ipBlacklist = JSON.parse(await fs.readFile("ipBlacklist.json"));
-        } catch (e) {
-            console.log(e);
-            let ipBlacklist = [];
-        }
-    })();
-    return ipBlacklist; // list should be an array of strings
+async function getIpBlacklist() {
+    try {
+        return ipBlacklist = JSON.parse(await fs.readFile("ipBlacklist.json"));
+    } catch (e) {
+        console.log(e);
+        return [];
+    }
 }
 
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
     var ipAddr = getClientIp(req);
-
-    if (getIpBlacklist().list.indexOf(ipAddr) !== -1) console.log(`everyone! look at the fool with the ip ${ipAddr}`);
-    else if (!req.query.hasOwnProperty("user")) return;
+    let list = await getIpBlacklist();
+    if (await list.list.indexOf(ipAddr) !== -1) console.log(`everyone! look at the fool with the ip ${ipAddr}`);
+    else if (!req.query.hasOwnProperty("user") ) next();
+    else if (users[req.query.user] == undefined) next(); // must be new!
     else if (users[req.query.user].blocked == true) console.log(`we blocked a connection attempt from ${req.query.user}`);
     else next();
 });
@@ -183,20 +180,53 @@ app.get("/alias", async (req, res) => {
 // add a way to block users from an api
 
 app.get("/block", async (req, res) => {
-    if (!req.query.hasOwnProperty("type") || !req.query.hasOwnProperty("auth") || !req.query.hasOwnProperty("user")) {
+    if (!req.query.hasOwnProperty("type") || !req.query.hasOwnProperty("auth") || !req.query.hasOwnProperty("acc")) {
         res.writeHead(400);
         res.end(JSON.stringify({ "error": "missing parameters" }));
         return;
     }
     
-    if (req.query.type == "ip" || req.query.type == "both") {
-        let list = getIpBlacklist();
-        list.list.push(req.query.ip);
-        await fs.writeFile("ipBlacklist.json", JSON.stringify(list));
+    else if (adminPassword() == false) {
+        res.writeHead(406);
+        res.end(JSON.stringify({ "error": "admin commands have been disabled" }));
+        return;
+    }
+    else if (req.query.auth !== adminPassword()) {
+        res.writeHead(418);
+        res.end(JSON.stringify({ "error": "stop it now!" }));
+        return;
     }
 
-    if (req.query.type == "user" || req.query.type == "both") {
-        users[req.query.user].blocked = true;
+    // if we reached this point the user is an admin and its ok to dump errors onto her ;)
+    if (req.query.type == "ip") {
+        try {
+            let list = await getIpBlacklist();
+            list.list.push(req.query.acc);
+            await fs.writeFile("ipBlacklist.json", JSON.stringify(list));
+            res.writeHead(200);
+            res.end();
+        }
+        catch (error) {
+            res.writeHead(500);
+            res.end(JSON.stringify({ "error": error.message }));
+        }
+    }
+
+    else if (req.query.type == "user") {
+        try {
+            users[req.query.user].blocked = true;
+            res.writeHead(200);
+            res.end();
+        }
+        catch (error) {
+            res.writeHead(500);
+            res.end(JSON.stringify({ "error": error.message }));
+        }
+    }
+    
+    else {
+        res.writeHead(400);
+        res.end(JSON.stringify({ "error": "you got us stumped, check your params?" }));       
     }
 })
 
