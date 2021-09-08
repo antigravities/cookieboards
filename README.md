@@ -9,7 +9,11 @@ Why take screenshots of your worthless stats when you can show them off on a sil
 wget https://raw.githubusercontent.com/antigravities/cookieboards/master/docker-compose.yml
 $EDITOR docker-compose.yml
 docker-compose up -d
+```
 
+or
+
+```sh
 git clone git@github.com:antigravities/cookieboards.git
 touch cookie.json
 cd cookieboards
