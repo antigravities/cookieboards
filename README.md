@@ -37,4 +37,6 @@ PASSWORD=yourpassword npm start
 ## License
 &copy; 2021 Alexandra Frock
 
+`formatEveryThirdPower`, `abbreviateNumber` based on code from [Frozen Cookies](https://github.com/Mtarnuhal/FrozenCookies).
+
 [GNU AGPL](https://www.gnu.org/licenses/agpl-3.0.en.html)
