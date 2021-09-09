@@ -5,27 +5,35 @@ const CookieBoards = {};
 CookieBoards.disabled = false;
 CookieBoards.awaitingPrompt = false;
 
-async function prompt(txt){
-    return new Promise((resolve, reject) => {
-        if( ! document.querySelector("#cookieboards__prompt") ){
-            let div = document.createElement("div");
-            div.innerHTML = `<div style="width: 60ch; height: 8em; position: absolute; top: 0; left: 0; background-color: white; z-index: 99999999999999999; padding: 1em; color: black;" id="cookieboards__prompt"><form action="" id="cookieboards__form"><span id="cookieboards__form-text"></span><br><input type="text" id="cookieboards__input"><br><br><input type="submit" value="Submit"></form>`
-            document.body.appendChild(div);
-        } else {
-            document.querySelector("#cookieboards__prompt").style.display = "block";
-        }
+function login(pw) {
+    CookieBoards.awaitingPrompt = false;
 
-        document.querySelector("#cookieboards__form-text").innerText = txt;
-        
-        let hdl = e => {
-            e.preventDefault();
-            document.querySelector("#cookieboards__prompt").style.display = "none";
-            document.querySelector("#cookieboards__form").removeEventListener("submit", hdl);
-            resolve(document.querySelector("#cookieboards__input").value);
-        }
+    if( pw === "" ){
+        CookieBoards.disabled = true;
+        return false;
+    }
 
-        document.querySelector("#cookieboards__form").addEventListener("submit", hdl);
-    });
+    let id;
+
+    try {
+        id = fetch("{{HOST}}/new?password=" + encodeURIComponent(pw))
+                .then(response => response.json())
+                .then(data => {
+                    if( data.error ){
+                        console.log(data);
+                        prompt();
+                    }
+                    console.log(data)
+                    CookieBoards.userID = data.data;
+                })
+    } catch(e) {
+        console.log(e);
+        prompt();
+    }
+}
+
+async function prompt(){
+    Game.Prompt('<h3>Login to CookieBoards!</h3><div class="block">Please enter the secret password. If you don\'t know what it is, ask the person who set up the server. Entering nothing will disable the mod.".</div><div class="block"><textarea id="textareaPrompt" style="width:100%;height:128px;"></textarea></div>',[['Lets Go!','login(l(\'textareaPrompt\').value);Game.ClosePrompt();']]);
 }
 
 CookieBoards.getUserID = async () => {
@@ -36,33 +44,7 @@ CookieBoards.getUserID = async () => {
     if( CookieBoards.awaitingPrompt ) return false;
     CookieBoards.awaitingPrompt = true;
 
-    while( true ){
-        let res = await prompt("Please enter the secret password. If you don't know what it is, ask the person who set up the server. Entering nothing will disable the mod.");
-
-        CookieBoards.awaitingPrompt = false;
-
-        if( res === "" ){
-            CookieBoards.disabled = true;
-            return false;
-        }
-
-        let id;
-
-        try {
-            id = await (await fetch("{{HOST}}/new?password=" + encodeURIComponent(res))).json();
-        } catch(e) {
-            console.log(e);
-            continue;
-        }
-
-        if( id.error ){
-            console.log(id);
-            continue;
-        }
-
-        CookieBoards.userID = id.id;
-        break;
-    }
+    prompt()
 }
 
 CookieBoards.getBakeryName = () => {

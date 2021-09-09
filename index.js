@@ -181,7 +181,8 @@ app.get("/alias", async (req, res) => {
 });
 
 // add a way to block users from an api
-
+// this is useful because if you update the json manually to block someone it gets ignored.
+// if you comment out this code or like delete it because its a mess fell free.
 app.get("/block", async (req, res) => {
     if (!req.query.hasOwnProperty("type") || !req.query.hasOwnProperty("auth") || !req.query.hasOwnProperty("acc")) {
         res.writeHead(400);
