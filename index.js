@@ -53,9 +53,6 @@ app.use(async (req, res, next) => {
     var ipAddr = getClientIp(req);
     let list = await getIpBlacklist();
     if (await list.list.indexOf(ipAddr) !== -1) console.log(`everyone! look at the fool with the ip ${ipAddr}`);
-    else if (!req.query.hasOwnProperty("user") ) next();
-    else if (users[req.query.user] == undefined) next(); // must be new!
-    else if (users[req.query.user].blocked == true) console.log(`we blocked a connection attempt from ${req.query.user}`);
     else next();
 });
 
@@ -184,7 +181,7 @@ app.get("/alias", async (req, res) => {
 // this is useful because if you update the json manually to block someone it gets ignored.
 // if you comment out this code or like delete it because its a mess fell free.
 app.get("/block", async (req, res) => {
-    if (!req.query.hasOwnProperty("type") || !req.query.hasOwnProperty("auth") || !req.query.hasOwnProperty("acc")) {
+    if (!req.query.hasOwnProperty("auth") || !req.query.hasOwnProperty("acc")) {
         res.writeHead(400);
         res.end(JSON.stringify({ "error": "missing parameters" }));
         return;
@@ -204,59 +201,31 @@ app.get("/block", async (req, res) => {
     // if we reached this point the user is an admin and its ok to dump errors onto her ;)
 
     if (req.query.unblock !== "true") {
-        if (req.query.type == "ip") {
-            try {
-                let list = await getIpBlacklist();
-                list.list.push(req.query.acc);
-                await fs.writeFile("ipBlacklist.json", JSON.stringify(list));
-                res.writeHead(200);
-                res.end();
-            }
-            catch (error) {
-                res.writeHead(500);
-                res.end(JSON.stringify({ "error": error.message }));
-            }
+        try {
+            let list = await getIpBlacklist();
+            list.list.push(req.query.acc);
+            await fs.writeFile("ipBlacklist.json", JSON.stringify(list));
+            res.writeHead(200);
+            res.end();
         }
-
-        else if (req.query.type == "user") {
-            try {
-                users[req.query.user].blocked = true;
-                res.writeHead(200);
-                res.end();
-            }
-            catch (error) {
-                res.writeHead(500);
-                res.end(JSON.stringify({ "error": error.message }));
-            }
+        catch (error) {
+            res.writeHead(500);
+            res.end(JSON.stringify({ "error": error.message }));
         }
     } else { // oooh an unban, I lazily copied and pasted code.
-        if (req.query.type == "ip") {
-            try {
-                let list = await getIpBlacklist();
-                list = list.list.filter(function(item) {
-                    return item !== req.query.acc
-                });
-                await fs.writeFile("ipBlacklist.json", JSON.stringify(list));
-                res.writeHead(200);
-                res.end();
-            }
-            catch (error) {
-                res.writeHead(500);
-                res.end(JSON.stringify({ "error": error.message }));
-            }
+        try {
+            let list = await getIpBlacklist();
+            list = list.list.filter(function(item) {
+                return item !== req.query.acc
+            });
+            await fs.writeFile("ipBlacklist.json", JSON.stringify(list));
+            res.writeHead(200);
+            res.end();
         }
-
-        else if (req.query.type == "user") {
-            try {
-                users[req.query.user].blocked = false;
-                res.writeHead(200);
-                res.end();
-            }
-            catch (error) {
-                res.writeHead(500);
-                res.end(JSON.stringify({ "error": error.message }));
-            }
-        }        
+        catch (error) {
+            res.writeHead(500);
+            res.end(JSON.stringify({ "error": error.message }));
+        }
     }
 })
 
