@@ -18,6 +18,7 @@
   "homepage": "https://github.com/antigravities/cookieboards#readme",
   "dependencies": {
     "express": "^4.17.1",
+    "jshint": "^2.13.1",
     "jszip": "^3.7.1",
     "uuid": "^8.3.2"
   }

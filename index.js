@@ -160,7 +160,6 @@ app.get("/", async (req, res) => {
 // allow admins and the user themself to give a user an alias, for if the user has a confusing bakery name and viewers may be unsure of who runs it
 // this is not privileged because only admins and the user would know the user id
 // this is not a method of handling abuse
-// TODO: forced bakery names as actual ways to handle abuse (can't have oopsie names)
 app.get("/alias", async (req, res) => {
     if (!req.query.hasOwnProperty("user") || !req.query.hasOwnProperty("alias")) {
         res.writeHead(400);
@@ -178,8 +177,7 @@ app.get("/alias", async (req, res) => {
 });
 
 // add a way to block users from an api
-// this is useful because if you update the json manually to block someone it gets ignored.
-// if you comment out this code or like delete it because its a mess fell free.
+// if you comment out this code or like delete it because its a mess feel free.
 app.get("/block", async (req, res) => {
     if (!req.query.hasOwnProperty("auth") || !req.query.hasOwnProperty("acc")) {
         res.writeHead(400);
