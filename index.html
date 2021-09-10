@@ -46,20 +46,45 @@
 <script>
     let cookie;
 
-    // https://gist.githubusercontent.com/tobyjsullivan/96d37ca0216adee20fa95fe1c3eb56ac/raw/48cac15a217507eeb66e3790f5d1d94c894ca782/abbreviateNum.js
-    function abbreviateNumber(value) {
-        let newValue = value;
-        const suffixes = ["", "thousand", "million", "billion", "trillion", "quadrillion", "quintillion", "sextillion", "septillion", "octillion", "nonillion", "decillion", "undecillion", "duodecillion", "tredecillion", "quattuordecillion", "quindecillion", "sexdecillion"];
-        let suffixNum = 0;
-        while (newValue >= 1000) {
-            newValue /= 1000;
-            suffixNum++;
+    // modified from cookie clicker source code
+    var formatLong=[' thousand',' million',' billion',' trillion',' quadrillion',' quintillion',' sextillion',' septillion',' octillion',' nonillion'];
+    var prefixes=['','un','duo','tre','quattuor','quin','sex','septen','octo','novem'];
+    var suffixes=['decillion','vigintillion','trigintillion','quadragintillion','quinquagintillion','sexagintillion','septuagintillion','octogintillion','nonagintillion'];
+    for (var i in suffixes)
+    {
+        for (var ii in prefixes)
+        {
+            formatLong.push(' '+prefixes[ii]+suffixes[i]);
         }
+    }
 
-        newValue = newValue.toPrecision(5);
+    function formatEveryThirdPower(notations,val)
+    {
+            var base=0,notationValue='';
+            if (!isFinite(val)) return 'Infinity';
+            if (val>=1000000)
+            {
+                val/=1000;
+                while(Math.round(val)>=1000)
+                {
+                    val/=1000;
+                    base++;
+                }
+                if (base>=notations.length) {return 'Infinity';} else {notationValue=notations[base];}
+            }
+            return (Math.round(val*1000)/1000)+notationValue;
+    }
 
-        newValue += " " + suffixes[suffixNum];
-        return newValue;
+    function abbreviateNumber(val,floats) {
+        var negative=(val<0);
+        var decimal='';
+        var fixed=val.toFixed(floats);
+        if (Math.abs(val)<1000 && floats>0 && Math.floor(fixed)!=fixed) decimal='.'+(fixed.toString()).split('.')[1];
+        val=Math.floor(Math.abs(val));
+        if (floats>0 && fixed==val+1) val++;
+        var output=formatEveryThirdPower(formatLong,val).toString().replace(/\B(?=(\d{3})+(?!\d))/g,',');
+        if (output=='0') negative=false;
+        return negative?'-'+output:output+decimal;
     }
 
     function bakery(bakery) {
