@@ -35,8 +35,13 @@ npm i
 PASSWORD=yourpassword npm start
 ```
 
+## Contributing
+
+I generally won't decline reasonable contributions, but please ensure that you mark commits intended to be merged into this project with a [Developer Certificate of Origin](https://developercertificate.org/) (`Signed-off-by`) header, or a similar attestation in your pull request's body.
 
 ## License
 &copy; 2021 Alexandra Frock
+
+`formatEveryThirdPower`, `abbreviateNumber` based on code from [Frozen Cookies](https://github.com/Mtarnuhal/FrozenCookies).
 
 [GNU AGPL](https://www.gnu.org/licenses/agpl-3.0.en.html)
