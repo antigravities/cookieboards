@@ -1,39 +1,32 @@
-// TODO: Check for updates on load in a non destructive way
-
 const CookieBoards = {};
 
 CookieBoards.disabled = false;
 CookieBoards.awaitingPrompt = false;
 
-function login(pw) {
-    CookieBoards.awaitingPrompt = false;
+async function prompt(txt){
+    return new Promise((resolve, reject) => {
+        if( ! document.querySelector("#cookieboards__prompt") ){
+            let div = document.createElement("div");
+            div.innerHTML = `<div style="width: 60ch; height: 8em; position: absolute; top: 0; left: 0; background-color: white; z-index: 99999999999999999; padding: 1em; color: black;" id="cookieboards__prompt"><form action="" id="cookieboards__form"><span id="cookieboards__form-text"></span><br><input type="text" id="cookieboards__input"><br><br><input type="submit" value="Submit"></form>`
+            document.body.appendChild(div);
+        } else {
+            document.querySelector("#cookieboards__prompt").style.display = "block";
+        }
 
-    if( pw === "" ){
-        CookieBoards.disabled = true;
-        return false;
-    }
+        document.querySelector("#cookieboards__form-text").innerText = txt;
+        
+        let hdl = e => {
+            e.preventDefault();
+            document.querySelector("#cookieboards__prompt").style.display = "none";
+            document.querySelector("#cookieboards__form").removeEventListener("submit", hdl);
+            resolve(document.querySelector("#cookieboards__input").value);
+        }
 
-    try {
-        CookieBoards.userID = fetch("{{HOST}}/new?password=" + encodeURIComponent(pw))
-                .then(response => response.json())
-                .then((data) => {
-                    if( data.error ){
-                        console.log(data);
-                        prompt();
-                    }
-                    return data.id;
-                });
-    } catch(e) {
-        console.log(e);
-        prompt();
-    }
+        document.querySelector("#cookieboards__form").addEventListener("submit", hdl);
+    });
 }
 
-async function prompt(){
-    Game.Prompt('<h3>Login to CookieBoards!</h3><div class="block">Please enter the secret password. If you don\'t know what it is, ask the person who set up the server. Entering nothing will disable the mod.".</div><div class="block"><textarea id="textareaPrompt" style="width:100%;height:128px;"></textarea></div>',[['Lets Go!','login(l(\'textareaPrompt\').value);Game.ClosePrompt();']]);
-}
-
-CookieBoards.getUserId = async () => {
+CookieBoards.getUserID = async () => {
     if( CookieBoards.userID ) return CookieBoards.userID;
 
     if( CookieBoards.disabled ) return false;
@@ -41,21 +34,47 @@ CookieBoards.getUserId = async () => {
     if( CookieBoards.awaitingPrompt ) return false;
     CookieBoards.awaitingPrompt = true;
 
-    prompt();
-};
+    while( true ){
+        let res = await prompt("Please enter the secret password. If you don't know what it is, ask the person who set up the server. Entering nothing will disable the mod.");
+
+        CookieBoards.awaitingPrompt = false;
+
+        if( res === "" ){
+            CookieBoards.disabled = true;
+            return false;
+        }
+
+        let id;
+
+        try {
+            id = await (await fetch("{{HOST}}/new?password=" + encodeURIComponent(res))).json();
+        } catch(e) {
+            console.log(e);
+            continue;
+        }
+
+        if( id.error ){
+            console.log(id);
+            continue;
+        }
+
+        CookieBoards.userID = id.id;
+        break;
+    }
+}
 
 CookieBoards.getBakeryName = () => {
     return document.querySelector("#bakeryName").innerText;
-};
+}
 
 CookieBoards.reportCPS = async cps => {
     cps = Game.cookiesPs*(1-Game.cpsSucked);
 
-    let userID = await CookieBoards.getUserId();
-    if( await userID === false ) return;
+    let userID = await CookieBoards.getUserID();
+    if( userID === false ) return;
 
     try {
-        let report = await (await fetch("{{HOST}}/cps?user=" + encodeURIComponent(await CookieBoards.userID) + "&cps=" + encodeURIComponent(cps) + "&bakery=" + encodeURIComponent(CookieBoards.getBakeryName()) + "&cookies=" + Game.cookies + "&prestige=" + Game.prestige)).json();
+        let report = await (await fetch("{{HOST}}/cps?user=" + encodeURIComponent(userID) + "&cps=" + encodeURIComponent(cps) + "&bakery=" + encodeURIComponent(CookieBoards.getBakeryName()) + "&cookies=" + Game.cookies + "&prestige=" + Game.prestige)).json();
         
         if( report.error ){
             console.log(report);
@@ -63,14 +82,14 @@ CookieBoards.reportCPS = async cps => {
     } catch(e){
         console.log(e);
     }
-};
+}
 
 CookieBoards.reportCPC = async cpc => {
-    let userID = await CookieBoards.getUserId();
-    if( await userID === false ) return;
+    let userID = await CookieBoards.getUserID();
+    if( userID === false ) return;
 
     try {
-        let report = await (await fetch("{{HOST}}/cpc?user=" + encodeURIComponent(await CookieBoards.userID) + "&cpc=" + encodeURIComponent(cpc) + "&bakery=" + encodeURIComponent(CookieBoards.getBakeryName()) + "&cookies=" + Game.cookies + "&prestige=" + Game.prestige)).json();
+        let report = await (await fetch("{{HOST}}/cpc?user=" + encodeURIComponent(userID) + "&cpc=" + encodeURIComponent(cpc) + "&bakery=" + encodeURIComponent(CookieBoards.getBakeryName()) + "&cookies=" + Game.cookies + "&prestige=" + Game.prestige)).json();
         
         if( report.error ){
             console.log(report);
@@ -78,7 +97,7 @@ CookieBoards.reportCPC = async cpc => {
     } catch(e){
         console.log(e);
     }
-};
+}
 
 CookieBoards.init = () => {
     Game.registerHook("cps", cps => {
@@ -92,7 +111,6 @@ CookieBoards.init = () => {
     });
 };
 
-// this causes main.js?v=2.090:22 Uncaught TypeError: str.replace
 CookieBoards.save = () => {
     if( CookieBoards.userID ){
         return CookieBoards.userID;
@@ -101,6 +119,6 @@ CookieBoards.save = () => {
 
 CookieBoards.load = data => {
     CookieBoards.userID = data;
-};
+}
 
 Game.registerMod("CookieBoards__{{HOST}}", CookieBoards);
