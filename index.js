@@ -19,7 +19,11 @@ function getPassword() {
 const password = getPassword();
 
 function adminPassword() {
-    return process.env.ADMIN || false;
+    if ( ! process.env.ADMIN ) {
+        console.warn('You did not supply an admin password. Admin endpoints will not work for your security');
+        return false;
+    }
+    return process.env.ADMIN;
 }
 
 function getClientIp(req) {
