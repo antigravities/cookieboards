@@ -97,7 +97,7 @@
         document.querySelector("#scores").innerHTML = "";
 
         document.querySelector("#scores").innerHTML = "<thead><th>Bakery Name</th><th>Cookies</th><th>CPS</th><th>Cookies Per Click</th></thead>" +
-            cookie.filter(i => i.bakery.endsWith("bakery")).map(i => `<tr><td>${bakery(i)} (<b>${i.prestige || 0}</b>)</td><td>${abbreviateNumber(Math.round(parseFloat(i.cookies)))}</td><td>${abbreviateNumber(Math.round(parseFloat(i.cps)))}</td><td>${abbreviateNumber(parseFloat(Math.round(i.cpc)))}</td></tr>`).join("") +
+            cookie.filter(i => i.bakery.endsWith("bakery")).map(i => `<tr><td>${i.bakery} (<b>${i.prestige || 0}</b>)</td><td>${abbreviateNumber(Math.round(parseFloat(i.cookies)))}</td><td>${abbreviateNumber(Math.round(parseFloat(i.cps)))}</td><td>${abbreviateNumber(parseFloat(Math.round(i.cpc)))}</td></tr>`).join("") +
             "</tbody>";
     }
 

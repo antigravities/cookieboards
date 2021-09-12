@@ -8,7 +8,7 @@ CookieBoards.awaitingPrompt = false;
 async function prompt() {
     return new Promise((resolve, reject) => {
         CookieBoards.isPrompted = true;
-        Game.Prompt('<h3>Login to CookieBoards!</h3><div class="block">Please enter the secret password. If you don\'t know what it is, ask the person who set up the server. Entering nothing will disable the mod.".</div><div class="block"><input id="textareaPrompt" style="width:100%;" /></div>',[['Lets Go!','pw = l(\'textareaPrompt\').value;CookieBoards.isPrompted = false;Game.ClosePrompt();']]);
+        Game.Prompt('<h3>Login to CookieBoards!</h3><div class="block">Please enter the secret password. If you don\'t know what it is, ask the person who set up the server. Entering nothing will disable the mod.</div><div class="block"><input id="textareaPrompt" style="width:100%;" /></div>',[['Lets Go!','pw = l(\'textareaPrompt\').value;CookieBoards.isPrompted = false;Game.ClosePrompt();']]);
         function checkFlag() {
             if(CookieBoards.isPrompted === true) {
                window.setTimeout(checkFlag, 100); /* this checks the flag every 100 milliseconds*/
