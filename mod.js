@@ -1,28 +1,22 @@
 const CookieBoards = {};
+// not secure but who cares
+let pw;
 
 CookieBoards.disabled = false;
 CookieBoards.awaitingPrompt = false;
 
-async function prompt(txt){
+async function prompt() {
     return new Promise((resolve, reject) => {
-        if( ! document.querySelector("#cookieboards__prompt") ){
-            let div = document.createElement("div");
-            div.innerHTML = `<div style="width: 60ch; height: 8em; position: absolute; top: 0; left: 0; background-color: white; z-index: 99999999999999999; padding: 1em; color: black;" id="cookieboards__prompt"><form action="" id="cookieboards__form"><span id="cookieboards__form-text"></span><br><input type="text" id="cookieboards__input"><br><br><input type="submit" value="Submit"></form>`
-            document.body.appendChild(div);
-        } else {
-            document.querySelector("#cookieboards__prompt").style.display = "block";
+        CookieBoards.isPrompted = true;
+        Game.Prompt('<h3>Login to CookieBoards!</h3><div class="block">Please enter the secret password. If you don\'t know what it is, ask the person who set up the server. Entering nothing will disable the mod.</div><div class="block"><input id="textareaPrompt" style="width:100%;" /></div>',[['Lets Go!','pw = l(\'textareaPrompt\').value;CookieBoards.isPrompted = false;Game.ClosePrompt();']]);
+        function checkFlag() {
+            if(CookieBoards.isPrompted === true) {
+               window.setTimeout(checkFlag, 100); /* this checks the flag every 100 milliseconds*/
+            } else {
+              resolve();
+            }
         }
-
-        document.querySelector("#cookieboards__form-text").innerText = txt;
-        
-        let hdl = e => {
-            e.preventDefault();
-            document.querySelector("#cookieboards__prompt").style.display = "none";
-            document.querySelector("#cookieboards__form").removeEventListener("submit", hdl);
-            resolve(document.querySelector("#cookieboards__input").value);
-        }
-
-        document.querySelector("#cookieboards__form").addEventListener("submit", hdl);
+        checkFlag();
     });
 }
 
@@ -35,11 +29,11 @@ CookieBoards.getUserID = async () => {
     CookieBoards.awaitingPrompt = true;
 
     while( true ){
-        let res = await prompt("Please enter the secret password. If you don't know what it is, ask the person who set up the server. Entering nothing will disable the mod.");
+        await prompt();
 
         CookieBoards.awaitingPrompt = false;
 
-        if( res === "" ){
+        if( pw === "" ){
             CookieBoards.disabled = true;
             return false;
         }
@@ -47,25 +41,28 @@ CookieBoards.getUserID = async () => {
         let id;
 
         try {
-            id = await (await fetch("{{HOST}}/new?password=" + encodeURIComponent(res))).json();
+            id = await (await fetch("{{HOST}}/new?password=" + encodeURIComponent(pw))).json();
         } catch(e) {
             console.log(e);
+            pw = undefined;
             continue;
         }
 
         if( id.error ){
             console.log(id);
+            pw = undefined;
             continue;
         }
 
         CookieBoards.userID = id.id;
+        pw = undefined;
         break;
     }
-}
+};
 
 CookieBoards.getBakeryName = () => {
     return document.querySelector("#bakeryName").innerText;
-}
+};
 
 CookieBoards.reportCPS = async cps => {
     cps = Game.cookiesPs*(1-Game.cpsSucked);
@@ -82,7 +79,7 @@ CookieBoards.reportCPS = async cps => {
     } catch(e){
         console.log(e);
     }
-}
+};
 
 CookieBoards.reportCPC = async cpc => {
     let userID = await CookieBoards.getUserID();
@@ -119,6 +116,6 @@ CookieBoards.save = () => {
 
 CookieBoards.load = data => {
     CookieBoards.userID = data;
-}
+};
 
 Game.registerMod("CookieBoards__{{HOST}}", CookieBoards);
